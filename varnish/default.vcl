@@ -4,9 +4,8 @@ import directors;
 import std;
 
 backend backend1 {
-    .host = "backend";
-    .port = "8081";
-  
+    .host = "envoy_new";
+    .port = "10000";
 }
 
 sub vcl_init {
@@ -15,7 +14,7 @@ sub vcl_init {
 }
 
 sub vcl_recv {
-    set req.backend_hint = vdir.backend();
+    set req.backend_hint = backend1;
     # std.log("Host header received: " + req.http.Host);
 }
 
@@ -26,11 +25,9 @@ sub vcl_backend_fetch {
     return (fetch);
 }
 
-sub vcl_backend_response {
-    # Don't cache 404 responses
-    if (beresp.status == 404) {
-        set beresp.uncacheable = true;
-    }
+sub vcl_miss {
+    set req.http.X-Cache-Miss = "1";
+    return (pass);
 }
 
 sub vcl_deliver {

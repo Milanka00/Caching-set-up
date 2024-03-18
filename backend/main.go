@@ -75,7 +75,7 @@ func generatePayloads() {
 	once.Do(func() {
 		payloads = make(map[int][]byte)
 		for i := 1; i <= 50; i++ {
-			payload := make([]byte, 102400)
+			payload := make([]byte, 1024)
 			for j := range payload {
 				payload[j] = 'x'
 			}

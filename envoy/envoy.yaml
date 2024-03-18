@@ -11,59 +11,57 @@ static_resources:
               typed_config:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: ingress_http
-                codec_type: AUTO
-                route_config:
-                  name: local_route
-                  virtual_hosts:
-                    - name: backend
-                      domains: ["*"]
-                      routes:
-                        - match: { prefix: "/" }
-                          route:
-                            cluster: backend_cluster
-                            timeout: 0s
-                http_filters:
-                  - name: envoy.filters.http.lua
+                access_log:
+                  - name: envoy.access_loggers.file
                     typed_config:
-                      "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
-                      inline_code: |
-                        function envoy_on_request(request_handle)
-                          if request_handle:headers():get(":path") == "/getresponse" then
-                            request_handle:headers():replace("host", "backend")
-                            
-                          elseif request_handle:headers():get(":path") == "/getsecondresponse" then
-                            request_handle:headers():replace("host", "second_backend")
-                           
-                          end
-                        end
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                      path: /dev/stdout
+                http_filters:
                   - name: envoy.filters.http.router
-                  
-# lua filters are alternative way of manipulating HTTP headers
-  # clusters:
-  #   - name: backend
-  #     connect_timeout: 0.25s
-  #     type: static
-  #     lb_policy: round_robin
-  #     load_assignment:
-  #       cluster_name: backend
-  #       endpoints:
-  #         - lb_endpoints:
-  #             - endpoint:
-  #                 address:
-  #                   socket_address:
-  #                     address: 172.17.0.1
-  #                     port_value: 8081
+        route_config:
+          name: local_route
+          virtual_hosts:
+            - name: local_service
+              domains: ["*"]
+              routes:
+                - match:
+                    prefix: "/"
+                    headers:
+                      - name: "x-cluster-header"
+                        exact_match: "varnish"
+                  route:
+                    cluster: varnish_backend_cluster
+                - match:
+                    prefix: "/"
+                    headers:
+                      - name: "x-cluster-header"
+                        exact_match: "actual_backend"
+                  route:
+                    cluster: actual_backend_cluster
   clusters:
-    - name: backend_cluster
+    - name: varnish_backend_cluster
       connect_timeout: 0.25s
       type: STRICT_DNS
       lb_policy: round_robin
       load_assignment:
-        cluster_name: backend_cluster
+        cluster_name: varnish_backend_cluster
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
-                      address: varnish
+                      address: varnish_new
                       port_value: 80
+    - name: actual_backend_cluster
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: actual_backend_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: backend_new
+                      port_value: 8081
