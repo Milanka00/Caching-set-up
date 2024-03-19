@@ -31,12 +31,12 @@ func main() {
     })
 
 	// Start server
-	fmt.Println("Server is listening on port 8081...")
-	http.ListenAndServe(":8081", nil)
+	fmt.Println("Server is listening on port 8082...")
+	http.ListenAndServe(":8082", nil)
 }
 
 func PublicCacheHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[len("/publiccache/"):])
+	id, err := strconv.Atoi(r.URL.Path[len("/secondarycache/"):])
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
 		return
