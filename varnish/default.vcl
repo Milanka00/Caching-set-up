@@ -9,17 +9,16 @@ backend default {
 
 sub vcl_miss {
     if (req.http.x-cluster-header == "varnish") {
-        set req.http.x-cluster-header = "actual_backend";
-        return (pass);
-    } else{
+        set req.http.x-cluster-header = "actual_backend";  
+    } 
         return (fetch);
-    }
+    
 }
 
 sub vcl_deliver {
-    if (!req.http.x-cluster-header) {
+   
         set resp.http.X-Cached-By = "Varnish";
-    }
+    
 }
 
 
