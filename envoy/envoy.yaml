@@ -4,7 +4,7 @@ static_resources:
       address:
         socket_address:
           address: 0.0.0.0
-          port_value: 10000
+          port_value: 9095
       filter_chains:
         - filters:
             - name: envoy.filters.network.http_connection_manager
@@ -18,26 +18,26 @@ static_resources:
                       path: /dev/stdout
                 http_filters:
                   - name: envoy.filters.http.router
-        route_config:
-          name: local_route
-          virtual_hosts:
-            - name: local_service
-              domains: ["*"]
-              routes:
-                - match:
-                    prefix: "/"
-                    headers:
-                      - name: "x-cluster-header"
-                        exact_match: "varnish"
-                  route:
-                    cluster: varnish_backend_cluster
-                - match:
-                    prefix: "/"
-                    headers:
-                      - name: "x-cluster-header"
-                        exact_match: "actual_backend"
-                  route:
-                    cluster: actual_backend_cluster
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: local_service
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                            headers:
+                              - name: "x-cluster-header"
+                                exact_match: "varnish"
+                          route:
+                            cluster: varnish_backend_cluster
+                        - match:
+                            prefix: "/"
+                            headers:
+                              - name: "x-cluster-header"
+                                exact_match: "actual_backend"
+                          route:
+                            cluster: actual_backend_cluster
   clusters:
     - name: varnish_backend_cluster
       connect_timeout: 0.25s

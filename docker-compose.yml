@@ -4,7 +4,7 @@ services:
   envoy_new:
     build: ./envoy
     ports:
-      - "10000:10000"
+      - "9095:9095"
     networks:
       - proxy_network
     deploy:
