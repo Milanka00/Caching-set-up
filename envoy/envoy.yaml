@@ -38,6 +38,13 @@ static_resources:
                                 exact_match: "actual_backend"
                           route:
                             cluster: actual_backend_cluster
+                        - match:
+                            prefix: "/"
+                            headers:
+                              - name: "x-cluster-header"
+                                exact_match: "actual_backend2"
+                          route:
+                            cluster: actual_backend2_cluster
   clusters:
     - name: varnish_backend_cluster
       connect_timeout: 0.25s
@@ -65,3 +72,17 @@ static_resources:
                     socket_address:
                       address: backend_new
                       port_value: 8081
+    
+    - name: actual_backend2_cluster
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      lb_policy: round_robin
+      load_assignment:
+        cluster_name: actual_backend2_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: backend2_new
+                      port_value: 8082

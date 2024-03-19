@@ -9,7 +9,7 @@ backend default {
 
 sub vcl_miss {
     if (req.http.x-cluster-header == "varnish") {
-        set req.http.x-cluster-header = "actual_backend";  
+        set req.http.x-cluster-header = req.http.redirect-backend;  
     } 
         return (fetch);
     
