@@ -16,9 +16,11 @@ sub vcl_miss {
 }
 
 sub vcl_deliver {
-   
+    if (obj.hits > 0) {
         set resp.http.X-Cached-By = "Varnish";
-    
+        set resp.http.X-Cache-Info = "Cached under host: " + req.http.Host + "; Request URI: " + req.url;
+    }
 }
+
 
 
