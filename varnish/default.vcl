@@ -15,6 +15,13 @@ sub vcl_miss {
     
 }
 
+sub vcl_backend_response {
+    # Don't cache 404 responses
+    if (beresp.status == 404) {
+        set beresp.uncacheable = true;
+    }
+}
+
 sub vcl_deliver {
     if (obj.hits > 0) {
         set resp.http.X-Cached-By = "Varnish";
