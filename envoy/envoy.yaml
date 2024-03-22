@@ -20,31 +20,19 @@ static_resources:
                   - name: envoy.filters.http.router
                 route_config:
                   name: local_route
-                  virtual_hosts: &virtual_hosts
+                  virtual_hosts: 
                     - name: local_service
                       domains: ["*"]
                       routes:
                         - match:
-                            prefix: "/"
+                            prefix: "/publiccache/"
                             headers:
                               - name: "x-cluster-header"
                                 exact_match: "varnish"
                           route:
                             cluster: varnish_backend_cluster
-                        - match:
-                            prefix: "/"
-                            headers:
-                              - name: "x-cluster-header"
-                                exact_match: "actual_backend"
-                          route:
-                            cluster: actual_backend_cluster
-                        - match:
-                            prefix: "/"
-                            headers:
-                              - name: "x-cluster-header"
-                                exact_match: "actual_backend2"
-                          route:
-                            cluster: actual_backend2_cluster
+                            prefix_rewrite: "/bar/"
+                  
     - name: listener_1
       address:
         socket_address:
@@ -65,7 +53,24 @@ static_resources:
                   - name: envoy.filters.http.router
                 route_config:
                   name: local_route
-                  virtual_hosts: *virtual_hosts
+                  virtual_hosts:
+                    - name: local_service
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                            headers:
+                              - name: "x-cluster-header"
+                                exact_match: "actual_backend"
+                          route:
+                            cluster: actual_backend_cluster
+                        - match:
+                            prefix: "/"
+                            headers:
+                              - name: "x-cluster-header"
+                                exact_match: "actual_backend2"
+                          route:
+                            cluster: actual_backend2_cluster 
   clusters:
     - name: varnish_backend_cluster
       connect_timeout: 0.25s

@@ -6,6 +6,10 @@ backend default {
     .port = "9096";
 }
 
+sub vcl_recv {
+     set req.http.Host = req.http.redirect-backend;
+}
+
 
 sub vcl_miss {
     if (req.http.x-cluster-header == "varnish") {
@@ -13,6 +17,12 @@ sub vcl_miss {
     } 
         return (fetch);
     
+}
+
+sub vcl_backend_fetch {
+    if (bereq.http.x-temp-path) {
+        set bereq.url = bereq.http.x-temp-path;
+    }
 }
 
 sub vcl_backend_response {
