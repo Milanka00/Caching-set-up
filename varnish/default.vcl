@@ -8,6 +8,7 @@ backend default {
 
 sub vcl_recv {
      set req.http.Host = req.http.redirect-backend;
+     set req.url = req.http.x-temp-path;
 }
 
 

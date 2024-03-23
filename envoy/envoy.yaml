@@ -25,13 +25,13 @@ static_resources:
                       domains: ["*"]
                       routes:
                         - match:
-                            prefix: "/publiccache/"
+                            prefix: "/customurl/"
                             headers:
                               - name: "x-cluster-header"
                                 exact_match: "varnish"
                           route:
                             cluster: varnish_backend_cluster
-                            prefix_rewrite: "/bar/"
+                            prefix_rewrite: "/publiccache/"
                   
     - name: listener_1
       address:
@@ -58,12 +58,14 @@ static_resources:
                       domains: ["*"]
                       routes:
                         - match:
-                            prefix: "/"
+                            prefix: "/customurl/"
                             headers:
                               - name: "x-cluster-header"
                                 exact_match: "actual_backend"
                           route:
                             cluster: actual_backend_cluster
+                            prefix_rewrite: "/publiccache/"
+                            
                         - match:
                             prefix: "/"
                             headers:
