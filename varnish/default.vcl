@@ -31,7 +31,20 @@ sub vcl_backend_response {
     if (beresp.status == 404) {
         set beresp.uncacheable = true;
     }
+
+    if (bereq.url ~ "/org1/") {
+        set beresp.storage = storage.org1;
+        set beresp.http.x-storage = "org1";
+    } elsif (bereq.url ~ "/org2/") {
+        set beresp.storage = storage.org2;
+        set beresp.http.x-storage = "org2";
+    } else {
+        set beresp.storage = storage.default; // Default storage
+        set beresp.http.x-storage = "default";
+    }
 }
+
+
 
 sub vcl_deliver {
     if (obj.hits > 0) {
