@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"sync"
-	
 )
 
 var payloads map[int][]byte
@@ -17,23 +16,48 @@ func main() {
 	http.HandleFunc("/secondarycache/", func(w http.ResponseWriter, r *http.Request) {
 		PublicCacheHandler(w, r)
 	})
-	
-   
-    http.HandleFunc("/nocache", func(w http.ResponseWriter, r *http.Request) {
-        NoCacheHandler(w, r)
-    })
 
-    http.HandleFunc("/privatecache", func(w http.ResponseWriter, r *http.Request) {
-        PrivateCacheHandler(w, r)
-    })
-    http.HandleFunc("/getresponse", func(w http.ResponseWriter, r *http.Request) {
-        getresponseWithoutHeaders(w, r)
-    })
+	http.HandleFunc("/nocache", func(w http.ResponseWriter, r *http.Request) {
+		NoCacheHandler(w, r)
+	})
+
+	http.HandleFunc("/privatecache", func(w http.ResponseWriter, r *http.Request) {
+		PrivateCacheHandler(w, r)
+	})
+
+	http.HandleFunc("/getresponse", func(w http.ResponseWriter, r *http.Request) {
+		getresponseWithoutHeaders(w, r)
+	})
+
+	http.HandleFunc("/queryresource", func(w http.ResponseWriter, r *http.Request) {
+		QueryResourceHandler(w, r)
+	})
 
 	// Start server
 	fmt.Println("Server is listening on port 8082...")
 	http.ListenAndServe(":8082", nil)
 }
+
+func QueryResourceHandler(w http.ResponseWriter, r *http.Request) {
+
+	queryParams := r.URL.Query()
+	param1 := queryParams.Get("param1")
+	param2 := queryParams.Get("param2")
+	param3 := queryParams.Get("param3")
+
+	if param1 == "" || param2 == "" || param3 == "" {
+		http.Error(w, "Missing query parameters", http.StatusBadRequest)
+		return
+	}
+
+	response := fmt.Sprintf("param1: %s, param2: %s, param3: %s", param1, param2, param3)
+
+	// Write response
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response))
+}
+
 
 func PublicCacheHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Path[len("/secondarycache/"):])
