@@ -9,6 +9,7 @@ backend default {
 sub vcl_recv {
      set req.http.Host = req.http.redirect-backend;
      set req.url = req.http.x-temp-path;
+     set req.url = std.querysort(req.url);
 }
 
 
@@ -23,6 +24,7 @@ sub vcl_miss {
 sub vcl_backend_fetch {
     if (bereq.http.x-temp-path) {
         set bereq.url = bereq.http.x-temp-path;
+        set bereq.url = std.querysort(bereq.url);
     }
 }
 
