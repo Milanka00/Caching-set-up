@@ -49,7 +49,7 @@ services:
           cpus: "0.5"
           memory: "500M"  # 500 MB
     command: 
-       -s default=malloc,2G
+       -s default=malloc,1M
        -s org1=malloc,3G
        -s org2=malloc,1G
 
